@@ -1,7 +1,6 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -9,20 +8,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
 import { useFilters } from "@/lib/hooks/use-filters";
 import { useState } from "react";
-import type { Creator, ProcessTemplate, User } from "@/lib/types/database";
+import type { Creator, ProcessTemplate, ProductType, User } from "@/lib/types/database";
 
 export function PipelineFilters({
   creators,
   pipelineSteps,
   teamMembers,
+  productTypes,
 }: {
   creators: Creator[];
   pipelineSteps: ProcessTemplate[];
   teamMembers: User[];
+  productTypes: ProductType[];
 }) {
   const { filters, setFilter, clearFilters, hasActiveFilters } = useFilters();
   const [searchInput, setSearchInput] = useState(filters.search ?? "");
@@ -45,6 +47,23 @@ export function PipelineFilters({
       </form>
 
       <Select
+        value={filters.product_type ?? ""}
+        onValueChange={(val) => setFilter("product_type", val || undefined)}
+      >
+        <SelectTrigger size="sm" className="w-[170px]">
+          <SelectValue placeholder="Produkttyp" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Alle Produkttypen</SelectItem>
+          {productTypes.map((pt) => (
+            <SelectItem key={pt.id} value={pt.id}>
+              {pt.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
         value={filters.creator ?? ""}
         onValueChange={(val) => setFilter("creator", val || undefined)}
       >
@@ -65,39 +84,17 @@ export function PipelineFilters({
         </SelectContent>
       </Select>
 
-      <Select
-        value={filters.status ?? ""}
-        onValueChange={(val) => setFilter("status", val || undefined)}
-      >
-        <SelectTrigger size="sm" className="w-[160px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">Alle Status</SelectItem>
-          {pipelineSteps.map((step) => (
-            <SelectItem key={step.step_name} value={step.step_name}>
-              {step.step_label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={filters.priority ?? ""}
-        onValueChange={(val) => setFilter("priority", val || undefined)}
-      >
-        <SelectTrigger size="sm" className="w-[120px]">
-          <SelectValue placeholder="Priorität" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">Alle Prio</SelectItem>
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((p) => (
-            <SelectItem key={p} value={String(p)}>
-              Prio {p}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <MultiSelect
+        options={pipelineSteps.map((step) => ({
+          value: step.step_name,
+          label: step.step_label,
+        }))}
+        selected={filters.status ? filters.status.split(",") : []}
+        onChange={(values) =>
+          setFilter("status", values.length > 0 ? values.join(",") : undefined)
+        }
+        placeholder="Status"
+      />
 
       <Select
         value={filters.assignee ?? ""}

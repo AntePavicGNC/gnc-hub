@@ -4,8 +4,55 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { Database, DefaultTask } from "@/lib/types/database";
 
+type ProjectInsert = Database["public"]["Tables"]["video_projects"]["Insert"];
 type ProjectUpdate = Database["public"]["Tables"]["video_projects"]["Update"];
 type TaskInsert = Database["public"]["Tables"]["tasks"]["Insert"];
+
+export async function createProject(data: {
+  customer_id: string;
+  product_type_id: string;
+  creator_id?: string;
+  video_count?: number;
+  location?: "studio" | "on_site";
+  desired_post_date?: string;
+  latest_post_date?: string;
+  title?: string;
+}) {
+  const supabase = await createClient();
+
+  // Get the first pipeline step for this product type
+  const { data: firstStep } = await supabase
+    .from("process_templates")
+    .select("step_name")
+    .eq("product_type_id", data.product_type_id)
+    .order("step_order", { ascending: true })
+    .limit(1)
+    .single();
+
+  const insert: ProjectInsert = {
+    customer_id: data.customer_id,
+    product_type_id: data.product_type_id,
+    creator_id: data.creator_id || null,
+    video_count: data.video_count || 1,
+    location: data.location || "studio",
+    status: firstStep?.step_name || "backoffice",
+    desired_post_date: data.desired_post_date || null,
+    latest_post_date: data.latest_post_date || null,
+    title: data.title || null,
+  };
+
+  const { data: project, error } = await supabase
+    .from("video_projects")
+    .insert(insert)
+    .select("id")
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/pipeline");
+  revalidatePath("/dashboard");
+  return project;
+}
 
 export async function updateProject(projectId: string, updates: ProjectUpdate) {
   const supabase = await createClient();

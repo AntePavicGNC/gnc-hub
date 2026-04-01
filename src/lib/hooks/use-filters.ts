@@ -12,9 +12,9 @@ export function useFilters() {
   const filters: ProjectFilters = {
     creator: searchParams.get("creator") ?? undefined,
     status: searchParams.get("status") ?? undefined,
-    priority: searchParams.get("priority") ?? undefined,
     assignee: searchParams.get("assignee") ?? undefined,
     search: searchParams.get("search") ?? undefined,
+    product_type: searchParams.get("product_type") ?? undefined,
   };
 
   const setFilter = useCallback(

@@ -9,9 +9,9 @@ import type {
 export type ProjectFilters = {
   creator?: string;
   status?: string;
-  priority?: string;
   assignee?: string;
   search?: string;
+  product_type?: string;
 };
 
 export async function getProjects(
@@ -31,17 +31,24 @@ export async function getProjects(
       sm_manager:users!assigned_sm_manager(id, name, avatar_url)
     `
     )
-    .order("priority", { ascending: true })
+    .order("script_deadline", { ascending: true, nullsFirst: false })
+    .order("desired_post_date", { ascending: true, nullsFirst: false })
+    .order("latest_post_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
+  if (filters?.product_type) {
+    query = query.eq("product_type_id", filters.product_type);
+  }
   if (filters?.creator) {
     query = query.eq("creator_id", filters.creator);
   }
   if (filters?.status) {
-    query = query.eq("status", filters.status);
-  }
-  if (filters?.priority) {
-    query = query.eq("priority", parseInt(filters.priority));
+    const statuses = filters.status.split(",");
+    if (statuses.length === 1) {
+      query = query.eq("status", statuses[0]);
+    } else {
+      query = query.in("status", statuses);
+    }
   }
   if (filters?.assignee) {
     query = query.or(
@@ -113,6 +120,16 @@ export async function getPipelineSteps(
   }
 
   const { data } = await query;
+  return data ?? [];
+}
+
+export async function getProductTypes() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("product_types")
+    .select("*")
+    .eq("is_active", true)
+    .order("name");
   return data ?? [];
 }
 

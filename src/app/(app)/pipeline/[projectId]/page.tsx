@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { getProjectById, getCreators, getPipelineSteps, getTeamMembers } from "@/lib/queries/projects";
 import { getTasksByProject } from "@/lib/queries/tasks";
+import { getPostingSlots } from "@/lib/queries/postings";
 import { ProjectForm } from "@/components/project/project-form";
 import { StatusStepper } from "@/components/project/status-stepper";
 import { TaskChecklist } from "@/components/project/task-checklist";
+import { PostingSchedule } from "@/components/project/posting-schedule";
 
 export default async function ProjectDetailPage({
   params,
@@ -16,13 +18,14 @@ export default async function ProjectDetailPage({
 }) {
   const { projectId } = await params;
 
-  const [project, creators, pipelineSteps, teamMembers, tasks] =
+  const [project, creators, pipelineSteps, teamMembers, tasks, postingSlots] =
     await Promise.all([
       getProjectById(projectId),
       getCreators(),
       getPipelineSteps(),
       getTeamMembers(),
       getTasksByProject(projectId),
+      getPostingSlots(projectId),
     ]);
 
   if (!project) notFound();
@@ -80,6 +83,16 @@ export default async function ProjectDetailPage({
                 tasks={tasks}
                 teamMembers={teamMembers}
                 currentStep={project.status}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4">
+              <PostingSchedule
+                projectId={project.id}
+                slots={postingSlots}
+                hasPostingPeriod={!!project.posting_period_start && !!project.posting_period_end}
               />
             </CardContent>
           </Card>

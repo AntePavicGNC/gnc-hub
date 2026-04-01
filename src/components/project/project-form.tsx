@@ -158,28 +158,18 @@ export function ProjectForm({
           </Select>
         </InlineField>
 
-        {/* Priority */}
-        <InlineField label="Priorität">
-          <Select
-            value={String(project.priority)}
-            onValueChange={(val) =>
-              handleFieldChange("priority", val ? parseInt(val) : 8)
+        {/* Dates */}
+        <InlineField label="Script-Deadline">
+          <Input
+            type="date"
+            defaultValue={project.script_deadline ?? ""}
+            onBlur={(e) =>
+              handleFieldChange("script_deadline", e.target.value || null)
             }
-          >
-            <SelectTrigger size="sm" className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((p) => (
-                <SelectItem key={p} value={String(p)}>
-                  {p}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            className="w-40"
+          />
         </InlineField>
 
-        {/* Dates */}
         <InlineField label="Wunschdatum">
           <Input
             type="date"
@@ -208,6 +198,29 @@ export function ProjectForm({
             defaultValue={project.shoot_date ?? ""}
             onBlur={(e) =>
               handleFieldChange("shoot_date", e.target.value || null)
+            }
+            className="w-40"
+          />
+        </InlineField>
+
+        {/* Posting Period */}
+        <InlineField label="Posting von">
+          <Input
+            type="date"
+            defaultValue={project.posting_period_start ?? ""}
+            onBlur={(e) =>
+              handleFieldChange("posting_period_start", e.target.value || null)
+            }
+            className="w-40"
+          />
+        </InlineField>
+
+        <InlineField label="Posting bis">
+          <Input
+            type="date"
+            defaultValue={project.posting_period_end ?? ""}
+            onBlur={(e) =>
+              handleFieldChange("posting_period_end", e.target.value || null)
             }
             className="w-40"
           />

@@ -19,16 +19,23 @@ import {
 import { PauseCircle, AlertTriangle } from "lucide-react";
 import type { VideoProjectWithRelations, ProcessTemplate } from "@/lib/types/database";
 
-const PRIORITY_LABELS: Record<number, { label: string; className: string }> = {
-  1: { label: "1", className: "bg-red-100 text-red-800 border-red-200" },
-  2: { label: "2", className: "bg-orange-100 text-orange-800 border-orange-200" },
-  3: { label: "3", className: "bg-amber-100 text-amber-800 border-amber-200" },
-  4: { label: "4", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-  5: { label: "5", className: "bg-lime-100 text-lime-800 border-lime-200" },
-  6: { label: "6", className: "bg-green-100 text-green-800 border-green-200" },
-  7: { label: "7", className: "bg-teal-100 text-teal-800 border-teal-200" },
-  8: { label: "8", className: "bg-slate-100 text-slate-600 border-slate-200" },
-};
+function getUrgency(project: VideoProjectWithRelations) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const deadlines = [
+    project.script_deadline,
+    project.desired_post_date,
+    project.latest_post_date,
+  ].filter(Boolean) as string[];
+  if (deadlines.length === 0) return null;
+  const nearest = deadlines.map((d) => new Date(d)).sort((a, b) => a.getTime() - b.getTime())[0];
+  const days = Math.ceil((nearest.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (days < 0) return { label: `${Math.abs(days)}d überfällig`, className: "bg-red-100 text-red-800 border-red-200" };
+  if (days <= 3) return { label: `${days}d`, className: "bg-red-100 text-red-800 border-red-200" };
+  if (days <= 7) return { label: `${days}d`, className: "bg-amber-100 text-amber-800 border-amber-200" };
+  if (days <= 14) return { label: `${days}d`, className: "bg-yellow-100 text-yellow-800 border-yellow-200" };
+  return { label: `${days}d`, className: "bg-green-100 text-green-800 border-green-200" };
+}
 
 function formatDate(date: string | null) {
   if (!date) return "—";
@@ -96,7 +103,7 @@ export function PipelineList({
           <TableHead>Kunde</TableHead>
           <TableHead>Creator</TableHead>
           <TableHead className="text-center">Videos</TableHead>
-          <TableHead className="text-center">Prio</TableHead>
+          <TableHead className="text-center">Dringlichkeit</TableHead>
           <TableHead>Wunsch</TableHead>
           <TableHead>Spätestens</TableHead>
           <TableHead>Dreh</TableHead>
@@ -108,7 +115,7 @@ export function PipelineList({
       </TableHeader>
       <TableBody>
         {projects.map((project) => {
-          const priority = PRIORITY_LABELS[project.priority] ?? PRIORITY_LABELS[8];
+          const urgency = getUrgency(project);
           const statusLabel = stepLabelMap.get(project.status) ?? project.status;
 
           return (
@@ -170,12 +177,16 @@ export function PipelineList({
               </TableCell>
               <TableCell className="text-center">{project.video_count}</TableCell>
               <TableCell className="text-center">
-                <Badge
-                  variant="outline"
-                  className={`text-xs font-semibold ${priority.className}`}
-                >
-                  {priority.label}
-                </Badge>
+                {urgency ? (
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-semibold ${urgency.className}`}
+                  >
+                    {urgency.label}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
               </TableCell>
               <TableCell className="text-xs">
                 {formatDate(project.desired_post_date)}

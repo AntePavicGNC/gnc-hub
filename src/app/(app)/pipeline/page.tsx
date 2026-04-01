@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getProjects, getCreators, getPipelineSteps, getTeamMembers } from "@/lib/queries/projects";
+import { getProjects, getCreators, getPipelineSteps, getTeamMembers, getProductTypes } from "@/lib/queries/projects";
+import { getCustomers } from "@/lib/queries/customers";
 import { PipelineList } from "@/components/pipeline/pipeline-list";
 import { PipelineFilters } from "@/components/pipeline/pipeline-filters";
 import { KanbanBoard } from "@/components/pipeline/kanban-board";
+import { CreateProjectDialog } from "@/components/pipeline/create-project-dialog";
 import type { ProjectFilters } from "@/lib/queries/projects";
 import { List, Columns3 } from "lucide-react";
 
@@ -15,19 +17,23 @@ export default async function PipelinePage({
 }) {
   const params = await searchParams;
 
+  const productTypeFilter = typeof params.product_type === "string" ? params.product_type : undefined;
+
   const filters: ProjectFilters = {
     creator: typeof params.creator === "string" ? params.creator : undefined,
     status: typeof params.status === "string" ? params.status : undefined,
-    priority: typeof params.priority === "string" ? params.priority : undefined,
     assignee: typeof params.assignee === "string" ? params.assignee : undefined,
     search: typeof params.search === "string" ? params.search : undefined,
+    product_type: productTypeFilter,
   };
 
-  const [projects, creators, pipelineSteps, teamMembers] = await Promise.all([
+  const [projects, creators, pipelineSteps, teamMembers, customers, productTypes] = await Promise.all([
     getProjects(filters),
     getCreators(),
-    getPipelineSteps(),
+    getPipelineSteps(productTypeFilter),
     getTeamMembers(),
+    getCustomers(),
+    getProductTypes(),
   ]);
 
   return (
@@ -39,6 +45,11 @@ export default async function PipelinePage({
             {projects.length} Projekte
           </p>
         </div>
+        <CreateProjectDialog
+          customers={customers}
+          creators={creators}
+          productTypes={productTypes}
+        />
       </div>
 
       <Suspense fallback={null}>
@@ -46,6 +57,7 @@ export default async function PipelinePage({
           creators={creators}
           pipelineSteps={pipelineSteps}
           teamMembers={teamMembers}
+          productTypes={productTypes}
         />
       </Suspense>
 

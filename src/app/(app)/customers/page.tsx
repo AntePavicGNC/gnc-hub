@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { getCustomers } from "@/lib/queries/customers";
 import { CustomerSearch } from "@/components/customers/customer-search";
+import { CreateCustomerDialog } from "@/components/customers/create-customer-dialog";
 import { Building2, Video } from "lucide-react";
 
 export default async function CustomersPage({
@@ -32,6 +33,7 @@ export default async function CustomersPage({
             {customers.length} Kunden
           </p>
         </div>
+        <CreateCustomerDialog />
       </div>
 
       <Suspense fallback={null}>

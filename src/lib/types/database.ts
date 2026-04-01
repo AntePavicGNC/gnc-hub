@@ -182,11 +182,13 @@ export type Database = {
           video_count: number;
           location: "studio" | "on_site";
           status: string;
-          priority: number;
+          script_deadline: string | null;
           desired_post_date: string | null;
           latest_post_date: string | null;
           shoot_date: string | null;
           actual_post_date: string | null;
+          posting_period_start: string | null;
+          posting_period_end: string | null;
           assigned_cutter: string | null;
           assigned_scripter: string | null;
           assigned_sm_manager: string | null;
@@ -207,11 +209,13 @@ export type Database = {
           video_count?: number;
           location?: "studio" | "on_site";
           status?: string;
-          priority?: number;
+          script_deadline?: string | null;
           desired_post_date?: string | null;
           latest_post_date?: string | null;
           shoot_date?: string | null;
           actual_post_date?: string | null;
+          posting_period_start?: string | null;
+          posting_period_end?: string | null;
           assigned_cutter?: string | null;
           assigned_scripter?: string | null;
           assigned_sm_manager?: string | null;
@@ -231,11 +235,13 @@ export type Database = {
           video_count?: number;
           location?: "studio" | "on_site";
           status?: string;
-          priority?: number;
+          script_deadline?: string | null;
           desired_post_date?: string | null;
           latest_post_date?: string | null;
           shoot_date?: string | null;
           actual_post_date?: string | null;
+          posting_period_start?: string | null;
+          posting_period_end?: string | null;
           assigned_cutter?: string | null;
           assigned_scripter?: string | null;
           assigned_sm_manager?: string | null;
@@ -285,6 +291,32 @@ export type Database = {
           is_completed?: boolean;
           completed_at?: string | null;
           sort_order?: number;
+        };
+        Relationships: [];
+      };
+      posting_slots: {
+        Row: {
+          id: string;
+          project_id: string;
+          video_number: number;
+          scheduled_date: string;
+          status: "planned" | "posted" | "skipped";
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          video_number: number;
+          scheduled_date: string;
+          status?: "planned" | "posted" | "skipped";
+          notes?: string | null;
+        };
+        Update: {
+          scheduled_date?: string;
+          status?: "planned" | "posted" | "skipped";
+          notes?: string | null;
         };
         Relationships: [];
       };

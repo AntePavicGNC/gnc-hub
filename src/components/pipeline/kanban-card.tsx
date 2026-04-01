@@ -83,7 +83,7 @@ export function KanbanCard({ project }: { project: VideoProjectWithRelations }) 
           </div>
         </div>
 
-        {/* Creator Badge + Priority */}
+        {/* Creator Badge + Video Count */}
         <div className="flex items-center gap-1.5">
           {project.creator && (
             <Badge
@@ -98,9 +98,6 @@ export function KanbanCard({ project }: { project: VideoProjectWithRelations }) 
               {project.creator.short_code}
             </Badge>
           )}
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-            P{project.priority}
-          </Badge>
           {project.video_count > 1 && (
             <span className="text-[10px] text-muted-foreground">
               {project.video_count} Videos
