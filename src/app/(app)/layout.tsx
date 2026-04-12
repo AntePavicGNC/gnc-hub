@@ -16,6 +16,10 @@ export default async function AppLayout({
     redirect("/login");
   }
 
+  if (user.role === "customer") {
+    redirect("/portal");
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar user={user} />

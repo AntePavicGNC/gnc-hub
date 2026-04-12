@@ -6,7 +6,7 @@ export type Database = {
           id: string;
           email: string;
           name: string;
-          role: "admin" | "team" | "viewer";
+          role: "admin" | "team" | "viewer" | "customer";
           job_function:
             | "cutter"
             | "scripter"
@@ -22,7 +22,7 @@ export type Database = {
           id: string;
           email: string;
           name: string;
-          role?: "admin" | "team" | "viewer";
+          role?: "admin" | "team" | "viewer" | "customer";
           job_function?:
             | "cutter"
             | "scripter"
@@ -38,7 +38,7 @@ export type Database = {
           id?: string;
           email?: string;
           name?: string;
-          role?: "admin" | "team" | "viewer";
+          role?: "admin" | "team" | "viewer" | "customer";
           job_function?:
             | "cutter"
             | "scripter"
@@ -112,6 +112,9 @@ export type Database = {
           step_name: string;
           step_label: string;
           default_tasks: DefaultTask[];
+          expected_days: number | null;
+          default_team_id: string | null;
+          description: string | null;
           created_at: string;
         };
         Insert: {
@@ -121,6 +124,9 @@ export type Database = {
           step_name: string;
           step_label: string;
           default_tasks?: DefaultTask[];
+          expected_days?: number | null;
+          default_team_id?: string | null;
+          description?: string | null;
           created_at?: string;
         };
         Update: {
@@ -129,6 +135,9 @@ export type Database = {
           step_name?: string;
           step_label?: string;
           default_tasks?: DefaultTask[];
+          expected_days?: number | null;
+          default_team_id?: string | null;
+          description?: string | null;
         };
         Relationships: [];
       };
@@ -142,6 +151,7 @@ export type Database = {
           contract_status: "active" | "negotiation" | "paused" | "completed";
           hubspot_deal_id: string | null;
           drive_folder_url: string | null;
+          portal_user_id: string | null;
           notes: string | null;
           created_at: string;
           updated_at: string;
@@ -155,6 +165,7 @@ export type Database = {
           contract_status?: "active" | "negotiation" | "paused" | "completed";
           hubspot_deal_id?: string | null;
           drive_folder_url?: string | null;
+          portal_user_id?: string | null;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -167,6 +178,7 @@ export type Database = {
           contract_status?: "active" | "negotiation" | "paused" | "completed";
           hubspot_deal_id?: string | null;
           drive_folder_url?: string | null;
+          portal_user_id?: string | null;
           notes?: string | null;
           updated_at?: string;
         };
@@ -194,6 +206,9 @@ export type Database = {
           assigned_sm_manager: string | null;
           script_url: string | null;
           drive_link: string | null;
+          drive_folder_id: string | null;
+          parent_project_id: string | null;
+          split_label: string | null;
           notes: string | null;
           is_on_hold: boolean;
           is_rejected: boolean;
@@ -221,6 +236,9 @@ export type Database = {
           assigned_sm_manager?: string | null;
           script_url?: string | null;
           drive_link?: string | null;
+          drive_folder_id?: string | null;
+          parent_project_id?: string | null;
+          split_label?: string | null;
           notes?: string | null;
           is_on_hold?: boolean;
           is_rejected?: boolean;
@@ -247,6 +265,9 @@ export type Database = {
           assigned_sm_manager?: string | null;
           script_url?: string | null;
           drive_link?: string | null;
+          drive_folder_id?: string | null;
+          parent_project_id?: string | null;
+          split_label?: string | null;
           notes?: string | null;
           is_on_hold?: boolean;
           is_rejected?: boolean;
@@ -261,6 +282,7 @@ export type Database = {
           pipeline_step: string;
           title: string;
           assigned_to: string | null;
+          assigned_team_id: string | null;
           estimated_minutes: number | null;
           deadline: string | null;
           is_completed: boolean;
@@ -274,6 +296,7 @@ export type Database = {
           pipeline_step: string;
           title: string;
           assigned_to?: string | null;
+          assigned_team_id?: string | null;
           estimated_minutes?: number | null;
           deadline?: string | null;
           is_completed?: boolean;
@@ -286,6 +309,7 @@ export type Database = {
           pipeline_step?: string;
           title?: string;
           assigned_to?: string | null;
+          assigned_team_id?: string | null;
           estimated_minutes?: number | null;
           deadline?: string | null;
           is_completed?: boolean;
@@ -355,22 +379,30 @@ export type Database = {
         Row: {
           id: string;
           project_id: string;
+          asset_id: string | null;
           stage: string;
           status: "pending" | "approved" | "changes_requested";
           feedback: string | null;
           approved_by: string | null;
           approved_at: string | null;
+          requested_by: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
           token: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           project_id: string;
+          asset_id?: string | null;
           stage: string;
           status?: "pending" | "approved" | "changes_requested";
           feedback?: string | null;
           approved_by?: string | null;
           approved_at?: string | null;
+          requested_by?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
           token?: string;
           created_at?: string;
         };
@@ -380,6 +412,9 @@ export type Database = {
           feedback?: string | null;
           approved_by?: string | null;
           approved_at?: string | null;
+          requested_by?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
         };
         Relationships: [];
       };
@@ -408,6 +443,141 @@ export type Database = {
         };
         Relationships: [];
       };
+      teams: {
+        Row: {
+          id: string;
+          name: string;
+          color: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          color?: string;
+          description?: string | null;
+        };
+        Update: {
+          name?: string;
+          color?: string;
+          description?: string | null;
+        };
+        Relationships: [];
+      };
+      team_members: {
+        Row: {
+          team_id: string;
+          user_id: string;
+          joined_at: string;
+        };
+        Insert: {
+          team_id: string;
+          user_id: string;
+          joined_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      project_assets: {
+        Row: {
+          id: string;
+          project_id: string;
+          asset_index: number;
+          title: string | null;
+          script_status: "pending" | "in_progress" | "review" | "approved";
+          video_status: "pending" | "in_progress" | "review" | "approved" | "posted";
+          script_deadline: string | null;
+          delivery_deadline: string | null;
+          drive_link: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          asset_index: number;
+          title?: string | null;
+          script_status?: "pending" | "in_progress" | "review" | "approved";
+          video_status?: "pending" | "in_progress" | "review" | "approved" | "posted";
+          script_deadline?: string | null;
+          delivery_deadline?: string | null;
+          drive_link?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          asset_index?: number;
+          title?: string | null;
+          script_status?: "pending" | "in_progress" | "review" | "approved";
+          video_status?: "pending" | "in_progress" | "review" | "approved" | "posted";
+          script_deadline?: string | null;
+          delivery_deadline?: string | null;
+          drive_link?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      project_changes: {
+        Row: {
+          id: string;
+          project_id: string;
+          user_id: string | null;
+          action: string;
+          payload: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          user_id?: string | null;
+          action: string;
+          payload?: Record<string, unknown>;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      project_messages: {
+        Row: {
+          id: string;
+          project_id: string;
+          sender_id: string;
+          body: string;
+          attachments: Array<{ name: string; url: string }>;
+          read_by_customer: boolean;
+          read_by_team: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          sender_id: string;
+          body: string;
+          attachments?: Array<{ name: string; url: string }>;
+          read_by_customer?: boolean;
+          read_by_team?: boolean;
+        };
+        Update: {
+          read_by_customer?: boolean;
+          read_by_team?: boolean;
+        };
+        Relationships: [];
+      };
+      dashboard_layouts: {
+        Row: {
+          user_id: string;
+          widgets: DashboardWidget[];
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          widgets?: DashboardWidget[];
+        };
+        Update: {
+          widgets?: DashboardWidget[];
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -422,6 +592,22 @@ export type DefaultTask = {
   estimated_minutes: number;
 };
 
+export type DashboardWidget = {
+  id: string;
+  type:
+    | "attention_list"
+    | "my_tasks"
+    | "upcoming_deadlines"
+    | "pipeline_summary"
+    | "workload_overview"
+    | "recent_activity"
+    | "social_kpis"
+    | "posting_calendar"
+    | "revenue_overview";
+  position: { x: number; y: number; w: number; h: number };
+  config?: Record<string, unknown>;
+};
+
 // Convenience type aliases
 export type User = Database["public"]["Tables"]["users"]["Row"];
 export type Creator = Database["public"]["Tables"]["creators"]["Row"];
@@ -433,6 +619,12 @@ export type Task = Database["public"]["Tables"]["tasks"]["Row"];
 export type Posting = Database["public"]["Tables"]["postings"]["Row"];
 export type Approval = Database["public"]["Tables"]["approvals"]["Row"];
 export type Questionnaire = Database["public"]["Tables"]["questionnaires"]["Row"];
+export type Team = Database["public"]["Tables"]["teams"]["Row"];
+export type TeamMember = Database["public"]["Tables"]["team_members"]["Row"];
+export type ProjectAsset = Database["public"]["Tables"]["project_assets"]["Row"];
+export type ProjectChange = Database["public"]["Tables"]["project_changes"]["Row"];
+export type ProjectMessage = Database["public"]["Tables"]["project_messages"]["Row"];
+export type DashboardLayout = Database["public"]["Tables"]["dashboard_layouts"]["Row"];
 
 // Extended types for views with joins
 export type VideoProjectWithRelations = VideoProject & {

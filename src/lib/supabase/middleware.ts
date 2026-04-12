@@ -24,7 +24,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, {
               ...options,
-              maxAge: 60 * 60 * 24 * 30, // 30 days
+              maxAge: 60 * 60 * 24 * 30,
               sameSite: "lax",
               secure: true,
             })
@@ -38,10 +38,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Public routes that don't require authentication
+  const pathname = request.nextUrl.pathname;
   const isPublicRoute =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/auth/callback");
+    pathname.startsWith("/login") || pathname.startsWith("/auth/callback");
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
@@ -49,11 +48,34 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect logged-in users away from login page
-  if (user && request.nextUrl.pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const role = profile?.role ?? "team";
+    const isCustomer = role === "customer";
+    const isPortalRoute = pathname.startsWith("/portal");
+
+    if (pathname === "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = isCustomer ? "/portal" : "/dashboard";
+      return NextResponse.redirect(url);
+    }
+
+    if (isCustomer && !isPortalRoute && !isPublicRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/portal";
+      return NextResponse.redirect(url);
+    }
+
+    if (!isCustomer && isPortalRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

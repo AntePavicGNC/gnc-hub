@@ -2,20 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, LayoutDashboard, KanbanSquare, Users, Settings, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Menu, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut } from "@/lib/actions/auth-actions";
+import { APP_NAV_ITEMS, filterNavItems } from "./nav-items";
 import type { User } from "@/lib/types/database";
-import { useState } from "react";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
-  { href: "/customers", label: "Kunden", icon: Users },
-  { href: "/settings", label: "Einstellungen", icon: Settings },
-];
 
 function getInitials(name: string) {
   return name
@@ -29,14 +23,11 @@ function getInitials(name: string) {
 export function MobileNav({ user }: { user: User }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const items = filterNavItems(APP_NAV_ITEMS, user);
 
   return (
     <div className="flex h-14 items-center justify-between border-b border-border bg-sidebar px-4 lg:hidden">
-      <img
-        src="/logos/gnc-logo-blue.svg"
-        alt="GNC"
-        className="h-7 w-auto"
-      />
+      <img src="/logos/gnc-logo-blue.svg" alt="GNC" className="h-7 w-auto" />
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger className="rounded-md p-2 hover:bg-accent transition-colors">
           <Menu className="h-5 w-5" />
@@ -51,8 +42,8 @@ export function MobileNav({ user }: { user: User }) {
               />
             </div>
 
-            <nav className="flex-1 space-y-1 px-3 py-4">
-              {navItems.map((item) => {
+            <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+              {items.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   pathname.startsWith(item.href + "/");
